@@ -10,3 +10,8 @@
 - [Jogo de pseudocódigo: Lobo, ovelha e o repolho](https://www.proprofsgames.com/wolf-sheep-and-cabbage/)
 - [Atividade: Jogo Pinguins numa fria](https://rachacuca.com.br/jogos/pinguins-numa-fria/)
 
+### Aprendendo fluxograma, variáveis e constantes
+- `Fluxograma` é uma ferramenta utilizada para representar graficamente o algoritmo.
+- `Variável` é um espaço na memória do compoutador destinado a um dado que é alterado durante a execução do algoritmo.
+- `Constantes` são valores imutáveis e não são alterados durante a vida útil do programa.
+- [flowgorithm](http://www.flowgorithm.org/download/)
