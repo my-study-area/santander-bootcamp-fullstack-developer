@@ -15,3 +15,20 @@
 - `Variável` é um espaço na memória do compoutador destinado a um dado que é alterado durante a execução do algoritmo.
 - `Constantes` são valores imutáveis e não são alterados durante a vida útil do programa.
 - [flowgorithm](http://www.flowgorithm.org/download/)
+
+### Tomadas de decisões e expressões
+- Operadores aritméticos: `+ - * / ^ %`
+- Exemplos de expressões literais:
+```
+nome = "José Silva"
+nome <- "José Silva"
+media = (nota1 + nota2 + nota3) / 3
+```
+- Exemplos de expressões aritméticas:
+```
+A = 2
+B = A + 3
+C = A + B
+```
+- Operadores relacionais: `> >= < <= == !=`.
+- 
