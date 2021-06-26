@@ -32,3 +32,7 @@ C = A + B
 ```
 - Operadores relacionais: `> >= < <= == !=`.
 - 
+
+### Como utilizar a concatenação
+- `Concatenação` é a união de duas strings.
+
