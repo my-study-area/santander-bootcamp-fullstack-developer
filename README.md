@@ -91,3 +91,7 @@ faca {
   contador++
 } enquanto (contador <= limite)
 ```
+
+### Aplicação prática com matrizes e vetores
+- `Matriz` é uma coleção de variáveis de mesmo tipo, acessíveis com um único nome e armazenados continuamente na memória. Com diversas dimensões (linhas e colunas)
+- `Vetor` é uma matriz que possui somente uma dimenção.
