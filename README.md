@@ -95,3 +95,12 @@ faca {
 ### Aplicação prática com matrizes e vetores
 - `Matriz` é uma coleção de variáveis de mesmo tipo, acessíveis com um único nome e armazenados continuamente na memória. Com diversas dimensões (linhas e colunas)
 - `Vetor` é uma matriz que possui somente uma dimenção.
+
+## Conceitos e melhores práticas com bancos de dados PostgreSQL
+
+### Fundamentos de banco de dados
+- **Modelo Relacional** é um modelo de dados representativo, onde as informações são organizadas em tabelas. A tabela é forma por linhas e colunas, onde as linhas são os dados e as colunas são os atributos.
+- **Chave primária** é uma coluna na tabela para identificar um valor único e é usado como índice para relacionar tabelas.
+- **Chave estrangeira** é uma coluna utilizada para criar um relacionamento em outras tabelas. Essa coluna possui um identificador (id) para localizar as informações em uma outra tabela.
+- PostgreSQL
+- [Documentação completa](https://www.postgresql.org/docs/13/)
