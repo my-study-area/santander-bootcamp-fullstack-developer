@@ -79,3 +79,15 @@ escolha (menu) {
     escreva("Você deve scolher a opção 1, 2 ou 3")
 }
 ```
+
+### Trabalhando com laços de repetição em Portugol
+- Na programação `Laço de repetição` é uma estrutura que permite executar mais de uma vez o mesmo comando ou conjunto de comando, de acordo com uma condição ou com um contador. Ex:
+```
+inteiro contador, limite
+contador = 0
+limite = 10
+faca {
+  escreva(contador)
+  contador++
+} enquanto (contador <= limite)
+```
