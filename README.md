@@ -42,3 +42,40 @@ C = A + B
 - Linguagem de programação é uma escrita forma que especifica um conjunto de instruções e regras usadas para gerar programa.
 - Portugol é uma pseudolinguagem que permite ao programador pensar no problema em si e não no equipamento que irá wxecutar o algoritmo.
 - [Portigol Studio](https://github.com/UNIVALI-LITE/Portugol-Studio/releases)
+
+### Aprenda a utilizar desvios condicionais e boas práticas em programação
+- a palavra reservada `se` no portugal é utilizada para testar uma condição. Ex:
+```
+se(numero > 5) {
+
+}
+```
+- a palavra reservada `senao` é utilizada em conjunto com a palavra reservada `se`. E somente é acessada quando a condição é `falsa`. Ex:
+```
+se(media >= 7) {
+  escreva("Aprovado!")
+}
+senao {
+  escreva("Reprovado!")
+}
+```
+- comentário são criados utilizando `//seu comentário`
+- a palavra chave `caso` é utilizada para realizar diversas comparações e não permite operadores lógicos. Ex:
+```
+escolha (menu) {
+  caso 1:
+    escreva("Opção 1")
+    pare
+
+  caso 2:
+    escreva("Opção 2")
+    pare
+
+  caso 3:
+    escreva("Opção 3")
+    pare
+
+  caso contrario:
+    escreva("Você deve scolher a opção 1, 2 ou 3")
+}
+```
