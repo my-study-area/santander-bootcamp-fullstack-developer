@@ -36,3 +36,9 @@ C = A + B
 ### Como utilizar a concatenação
 - `Concatenação` é a união de duas strings.
 
+### Aprenda como utilizar uma estrutura de repetição
+
+### O que são linguagens de programação?
+- Linguagem de programação é uma escrita forma que especifica um conjunto de instruções e regras usadas para gerar programa.
+- Portugol é uma pseudolinguagem que permite ao programador pensar no problema em si e não no equipamento que irá wxecutar o algoritmo.
+- [Portigol Studio](https://github.com/UNIVALI-LITE/Portugol-Studio/releases)
