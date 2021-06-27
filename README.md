@@ -104,3 +104,64 @@ faca {
 - **Chave estrangeira** é uma coluna utilizada para criar um relacionamento em outras tabelas. Essa coluna possui um identificador (id) para localizar as informações em uma outra tabela.
 - PostgreSQL
 - [Documentação completa](https://www.postgresql.org/docs/13/)
+
+### O que é o arquivo postgresql.conf
+- `postgresql.conf` é o arquivo que possui todas as configurações do banco de dados.
+- a view `pg_settings`, acessada por dentro do banco de dados possui as configurações atuais do banco de dados. Alterações no arquivo `postgresql.conf` somente poderão ser acessadas após a reinicialização do servidor. Exemplo de comandos:
+```sql
+SELECT name, setting FROM pg_settings;
+```
+- o arquivo `postgresql.conf` está localizado no diretório **PGDATA** que é definido durante a instalação.
+- Configurações de conexão:
+  - `LISTEN_ADDRESS`: enredeços TCP/IP que o servidor irá escutar/liberar conexões.
+  - `PORT`: A porta TCP que o servidor PostgreSQL vai ouvir. O padrão é 5432.
+  - `MAX_CONNECTIONS`: número máximo de conexões simultâneas.
+  - `SUPERUSER_RESERVED_CONNECTIONS`: número de conexões (slots) reservadas para conexão do banco de dados de super usuários.
+- Configurações de autenticação:
+  - `AUTHENTICATION_TIMEOUT`: tempo máximo em segundos para cliente conseguir uma conexão com o servidor.
+  - `PASSWORD_ENCRYPTION`: algoritmo usado para criptografia das senhas dos usuários do banco de dados.
+  - `SSL`: habilita a conexão criptografada por ssl (somente se o PostgreSQL fio compilado com suporte SSL).
+- Configurações de memória:
+  - `SHARED_BUFFERS`: tamanho da memória compartilhada do servidor PostgreSQL para chache/buffer de tabelas, índices e damais relações.
+  - `WORK_MEM`: tamanho de memória para operações de agrupamento e ordenação (**ORDER BY, DISTINCT, MERGE JOINS**)
+  - `MAINTENANCW_WORK_MEM`: tamanho da memória para operações como VACUUM, INDEX, ALTER TABLE.
+- o arquivo `pg_hba.conf` é responsávelpelo controle de autenticação no servidor PostgreSQL. Ex:
+```
+local     database user auth-method    [auth-options]
+host      database user address   auth-method  [auth-options]
+hostssl     database user address   auth-method  [auth-options]
+hostnossl     database user address   auth-method  [auth-options]
+host     database user ip-address  IP-mask  auth-method  [auth-options]
+hostssl     database user ip-address  IP-mask  auth-method  [auth-options]
+hostnossl     database user ip-address  IP-mask  auth-method  [auth-options]
+```
+- Métodos de autenticação:
+  - `TRUST`: conexão sem requisição de senha
+  - `REJECT`: rejeita conexões
+  - `MD5`: cripstografia md5
+  - `PASSWORD`: senha sem criptografia
+  - `GSS`: generic security service apllication program interface
+  - `SSPI`: security support provider interface (Windows)
+  - `KRB5`: Kerberos V5
+  - `IDENT`: utiliza o usuário do sistema operacional do cliente via ident server
+  - `PEER`: utiliza o usuário do sistema operacional do cliente
+  - `LDAP`: ldap server
+  - `RADIUS`: radius server
+  - `CERT`: autenticação via certificado ssl do cliente
+  - `PAM`: pluggable authentication modules. O usuário precisa estar no banco
+- o arquivo `pg_ident.conf` é responsavél por mapear os usuários do sistema operacional com os usuários do banco de dados. Ele está localizado no diretório PGDATA. A opção `ident` deve ser utilizada no arquivo `pg_hba.conf`. Exemplo:
+```
+# MAPNAME       SYSTEM-USERNAME PG-USERNAME
+diretoria       daniel          pg_diretoria
+comercial       tiburcio        pg_diretoria
+comercial       valdeci         pg_comercial
+```
+- Comandos administrativos:
+  - Ubuntu:
+    - pg_lsclusters: lista os cluster PostgreSQL
+    - pg_createcluster <version> <cluster name>: cria um novo cluster PostgreSQL
+    - pg_dropcluster <verions> <cluster>: apaga um cluster PostgreSQL
+    - pg_ctlcluster <verison> <cluster> <action>: start, stop, status, restar de clusters PostgreSQL
+- `Cluster` é uma coleção de banco de dados que compartilham as mesmas configurações (arquivos de configuração) do PostgreSQL e dos Sistema operacional (porta, listen_address, etc). Ele pode conter um ou mais bancos de dados.
+- `Bancos de dados` é um conjunto de schemas com seus objetos/relações (tabelas, funções, views, etc)
+- `Schema` é um conjunto de objetos e relações (tabelas, funções, views, etc). Alguns bancos de dados, como o Mysql, interpretam schemas como bancos de dados.
