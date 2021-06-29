@@ -165,3 +165,18 @@ comercial       valdeci         pg_comercial
 - `Cluster` é uma coleção de banco de dados que compartilham as mesmas configurações (arquivos de configuração) do PostgreSQL e dos Sistema operacional (porta, listen_address, etc). Ele pode conter um ou mais bancos de dados.
 - `Bancos de dados` é um conjunto de schemas com seus objetos/relações (tabelas, funções, views, etc)
 - `Schema` é um conjunto de objetos e relações (tabelas, funções, views, etc). Alguns bancos de dados, como o Mysql, interpretam schemas como bancos de dados.
+
+### Conheça a ferramenta PGAdmin
+- Verificações para realizar conexão com banco de dados:
+  - Liberar acesso ao cluster em `postgresql.conf`
+  - Liberar acesso ao cluster para o usuário do banco de dados em `pg_hba.conf`
+  - Criar/editar usuários
+- Exemplo de conexão com postgresql na linha de comando: `psql -U usuario -h localhost nomeDoBancoDeDados`, onde `usuario` é o usuário, `localhost` é o nome ou ip do servidor e `nomeDoBancoDeDados` é o nome do banco de dados.
+- Para adicionar senha no usuário **postgres** padrão faça:
+  - conectado no banco de dados execute `ALTER USER postgres PASSWORD '123';`
+  - acesse o arquivo `pg_hba.conf` e na seção de conexão local altere o método de autenticação de `PEER` para `MD5`.
+  - reinicie o cluster para as alterações terem efeito: `pg_ctlcluster 11 aula reload`
+- criando banco de dados no pgadmin:
+  - selecione uma banco de dados existente e acesse `Tools > Query Tool` e crie um banco de dado com `CREATE DATABASE auladb;`
+  - atualize a visualização dos bancos de dados no menu lateral clicando com o `botão direito do mouse` > `Refresh ...`
+  - selecione o banco de dados criado, acesse `Tools > Query Tool` para realizar os comando no banco de dados criado.
