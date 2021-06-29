@@ -14,5 +14,16 @@ services:
       POSTGRES_PASSWORD: user
       POSTGRES_DB: aula
 
+  pgadmin4:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "email@email.com"
+      PGADMIN_DEFAULT_PASSWORD: "123"
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
 volumes:
   db-data:
