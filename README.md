@@ -111,7 +111,7 @@ faca {
 ```sql
 SELECT name, setting FROM pg_settings;
 ```
-- o arquivo `postgresql.conf` está localizado no diretório **PGDATA** que é definido durante a instalação.
+- o arquivo `postgresql.conf` está localizado no diretório **PGDATA** que é definido durante a instalação. Na imagem docker **postgres:11** está localizado em `/var/lib/postgresql/data/postgresql.conf`.
 - Configurações de conexão:
   - `LISTEN_ADDRESS`: enredeços TCP/IP que o servidor irá escutar/liberar conexões.
   - `PORT`: A porta TCP que o servidor PostgreSQL vai ouvir. O padrão é 5432.
@@ -125,7 +125,7 @@ SELECT name, setting FROM pg_settings;
   - `SHARED_BUFFERS`: tamanho da memória compartilhada do servidor PostgreSQL para chache/buffer de tabelas, índices e damais relações.
   - `WORK_MEM`: tamanho de memória para operações de agrupamento e ordenação (**ORDER BY, DISTINCT, MERGE JOINS**)
   - `MAINTENANCW_WORK_MEM`: tamanho da memória para operações como VACUUM, INDEX, ALTER TABLE.
-- o arquivo `pg_hba.conf` é responsávelpelo controle de autenticação no servidor PostgreSQL. Ex:
+- o arquivo `pg_hba.conf` é responsávelpelo controle de autenticação no servidor PostgreSQL. Na imagem docker **postgres:11** está localizado em `/var/lib/postgresql/data/pg_hba.conf`. Ex:
 ```
 local     database user auth-method    [auth-options]
 host      database user address   auth-method  [auth-options]
