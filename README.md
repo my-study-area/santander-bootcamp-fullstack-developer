@@ -283,3 +283,116 @@ CREATE ROLE daniel2 LOGIN PASSWORD '123' ROLE professores;
 
   REVOKE professores FROM daniel4;
   ```
+### Objetos e comandos do banco de dados
+- Database:
+  - É o banco de dados
+  - Grupo de schemas e seus objetos como tabelas, view, funçõrd e etc.
+  - Os schemas e objetos de um banco de dados não podem ser compartilhados
+  - Bancos de dados compartilham apenas usuários/roles e configurações de cluster PostgreSQL.
+- Schemas:
+  - É um grupo de objetos, como tabelas, types, views, funções entre outros
+  - É possível relacionar objetos entre diversos schemas. Por exemplo: schema public e schema curso podem ter tabelas com o mesmo nome (teste por exemplo) relacionando-se entre si.
+- Objetos:
+  - São as tabelas, views, funções, types, sequences, entre outros pertencentes aos schemas.
+- Melhores práticas:
+  - utilizar `IF NOT EXISTS`. Ex: 
+    - `CREATE SCHEMA IF NOT EXISTS schema_name [AUTORIZATION role_specification]`
+    - `DROP SCHEMA IF EXISTS [nome]`
+- Tabelas, colunas e tipos de dados
+  - Tabelas são conjuntos de dados dispostos em colunas e linhas referentes a um objetivo comum.
+  - Colunas são consideradas como _"compos de tabela"_ ou atributos da tabela.
+  - As linhas de uma tabela são chamadas também de tuplas, e é onde estão contidos os valores, os dados.
+- [Tipos de dados](https://www.postgresql.org/docs/11/datatype.html):
+  - Numeric 
+  - Monetary 
+  - Character 
+  - Binary Data 
+  - Date/Time 
+  - Boolean 
+  - Enumerated 
+  - Geometric 
+  - Network Address 
+  - Bit String 
+  - Text Search 
+  - UUID 
+  - XML 
+  - JSON 
+  - Arrays
+  - Composite 
+  - Range 
+  - Domain 
+  - Object Identifier 
+  - pg_lsn 
+  - Pseudo-Type
+- DML e DDL
+  - DML - Data manipulation Language
+    - Linguagem de manipulação de dados
+    - INSERT, UPDATE, DELETE, SELECT
+    - O SELECT pode ser considerado como DML por uns, DQL (Liguagem de consulta de dados)
+  - DDL - Data Definition Language
+    - Ligaugem de definição de dados
+    - CREATE, ALTER, DROP
+  - Comando utilizados na prática:
+```sql
+CREATE DATABASE financas;
+
+CREATE TABLE IF NOT EXISTS banco (
+	numero INTEGER NOT NULL,
+	nome VARCHAR(50) NOT NULL,
+	ativo BOOLEAN NOT NULL DEFAULT TRUE,
+	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (numero)
+);
+
+CREATE TABLE IF NOT EXISTS agencia (
+	banco_numero INTEGER NOT NULL,
+	numero INTEGER NOT NULL,
+	nome VARCHAR(80) NOT NULL,
+	ativo BOOLEAN NOT NULL DEFAULT TRUE,
+	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (banco_numero,numero),
+	FOREIGN KEY (banco_numero) REFERENCES banco (numero)
+);
+
+CREATE TABLE IF NOT EXISTS cliente (
+	numero BIGSERIAL PRIMARY KEY,
+	nome VARCHAR(120) NOT NULL,
+	email VARCHAR(120) NOT NULL,
+	ativo BOOLEAN NOT NULL DEFAULT TRUE,
+	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS conta_corrente (
+	banco_numero INTEGER NOT NULL,
+	agencia_numero INTEGER NOT NULL,
+	numero BIGINT NOT NULL,
+	digito SMALLINT NOT NULL,
+	cliente_numero BIGINT NOT NULL,
+	ativo BOOLEAN NOT NULL DEFAULT TRUE,
+	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (banco_numero,agencia_numero,numero, digito,cliente_numero),
+	FOREIGN KEY (banco_numero, agencia_numero) REFERENCES agencia (banco_numero,numero)
+);
+
+CREATE TABLE IF NOT EXISTS tipo_transacao (
+	id SMALLSERIAL PRIMARY KEY,
+	nome VARCHAR(50) NOT NULL,
+	ativo BOOLEAN NOT NULL DEFAULT TRUE,
+	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS cliente_transacoes (
+	id BIGSERIAL PRIMARY KEY,
+	banco_numero INTEGER NOT NULL,
+	agencia_numero INTEGER NOT NULL,
+	conta_corrente_numero BIGINT NOT NULL,
+	conta_corrente_digito SMALLINT NOT NULL,
+	cliente_numero BIGINT NOT NULL,
+	tipo_transacao_id SMALLINT NOT NULL,
+	valor NUMERIC(15,2) NOT NULL,
+	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (banco_numero, agencia_numero,conta_corrente_numero,conta_corrente_digito,cliente_numero) 
+		REFERENCES conta_corrente (banco_numero,agencia_numero,numero, digito,cliente_numero)	
+);
+```
