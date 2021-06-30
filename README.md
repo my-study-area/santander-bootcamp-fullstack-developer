@@ -180,3 +180,106 @@ comercial       valdeci         pg_comercial
   - selecione uma banco de dados existente e acesse `Tools > Query Tool` e crie um banco de dado com `CREATE DATABASE auladb;`
   - atualize a visualização dos bancos de dados no menu lateral clicando com o `botão direito do mouse` > `Refresh ...`
   - selecione o banco de dados criado, acesse `Tools > Query Tool` para realizar os comando no banco de dados criado.
+
+### Como administrar usuários no banco de dados
+- Roles, users e grupos de usuários são contas/perfis de atuação de um banco de dados.
+- Nas versões anteriores do PostgreSQL 8.1, usuários e roles tinham comportamentos diferentes. Atualmente roles e user são aliases.
+- Exemplos de criação de Roles:
+```sql
+CREATE ROLE administradores
+  CREATEDB
+  CREATEROLE
+  INHERIT
+  NOLOGIN
+  REPLICATION
+  BYPASSRLS
+  CONNECTION LIMIT -1;
+
+CREATE ROLE professores
+  NOCREATEDB
+  NOCREATEROLE
+  INHERIT
+  NOLOGIN
+  NOBYPASSRLS
+  CONNECTION LIMIT 10;
+
+CREATE ROLE alunos
+  NOCREATEDB
+  NOCREATEROLE
+  INHERIT
+  NOLOGIN
+  NOBYPASSRLS
+  CONNECTION LIMIT 90;
+```
+- Associação entre roles:
+  - Quando uma role assume permissões de outra role é necessário a opção `INHERIT`.
+  - `IN ROLE`: passa a pertencer a role informada
+  - `ROLE`: a role informada passa a pertencer a nova role
+  - Após a criação da role utilize `GRANT [role a ser concidada] TO [role a assumir as permissões]`
+- Exemplo de associação entre roles:
+```sql
+CREATE ROLE professores
+  NOCREATEDB
+  NOCREATEROLE
+  INHERIT
+  NOLOGIN
+  NOBYPASSRLS
+  CONNECTION LIMIT -1;
+
+-- a role daniel passa a assumir as permissões da role professores
+CREATE ROLE daniel LOGIN CONNECTION LIMIT 1 PASSWORD '123' IN ROLE professores;
+
+-- a role professores passa a fazer parte da role daniel
+-- assumindo suas permissões
+CREATE ROLE daniel LOGIN CONNECTION LIMIT 1 PASSWORD '123' ROLE professores;
+
+CREATE ROLE daniel LOGIN CONNECTION LIMIT 1 PASSWORD '123';
+GRANT professores TO daniel;
+```
+- Desassociar membros entre roles:
+  - `REVOKE [role que terá suas permissões revogadas]`
+  - Exemplo: `REVOKE professores FROM daniel;`
+- Alterando uma role:
+  - `ALTER role_specification [WITH] option [ ... ]`
+- Excluindo uma role:
+  - `DROP ROLE role_specification;`
+- `\du`: lista todas as roles do banco de dados
+- `SELECT * FROM pg_roles;`: lista todas as roles do banco de dados
+- Comando usados na prática:
+```sql
+CREATE ROLE professores NOCREATEDB NOCREATEROLE INHERIT NOLOGIN NOBYPASSRLS CONNECTION LIMIT 10;
+
+DROP ROLE professoresnocreatedb;
+
+SELECT * FROM pg_roles;
+
+ALTER ROLE professores PASSWORD '123';
+
+CREATE ROLE daniel LOGIN PASSWORD '123';
+
+DROP ROLE daniel;
+
+CREATE ROLE daniel LOGIN PASSWORD '123' IN ROLE professores;
+
+CREATE ROLE daniel2 LOGIN PASSWORD '123' ROLE professores;
+```
+- Adminstrando acessos (GRANT):
+  - são privilégios de acesso aos objetos do banco de dados como: tabela, coluna, sequence, database, domain, function, schema e etc.
+  - `revoke`: retira permissões da role. Exemplos revagando todas as permissões:
+  ```sql
+  REVOKE ALL ON ALL TABLES IN SCHEMA [schema] FROM [role];
+  REVOKE ALL ON SCHEMA [schema] FROM [role];
+  REVOKE ALL ON DATABASE [database] FROM [role];
+  ```
+  - Comando utilizados na prática:
+  ```sql
+  CREATE TABLE teste (nome varchar);
+
+  GRANT ALL ON TABLE teste TO professores;
+
+  CREATE ROLE daniel3 LOGIN PASSWORD '123';
+
+  CREATE ROLE daniel4 INHERIT LOGIN PASSWORD '123' IN ROLE professores;
+
+  REVOKE professores FROM daniel4;
+  ```
