@@ -396,3 +396,73 @@ CREATE TABLE IF NOT EXISTS cliente_transacoes (
 		REFERENCES conta_corrente (banco_numero,agencia_numero,numero, digito,cliente_numero)	
 );
 ```
+
+### Conheça o DML e o Truncate
+- `Idempotência`: propriedade que algumas ações/operações possuem possibilitando-as de serem executadas diversas vezes sem alterar o resultado após a aplicação inicial. Ex: o uso de `IF NOT EXISTS` para criar tabelas.
+- SELECT - Idempotência
+```sql
+-- NÃO É BOA PRÁTICA
+-- MELHOR USAR LEFT JOIN
+SELECT (campos,)
+FROM tabela1
+WHERE EXISTS (
+  SELECT (campo,)
+  FROM tabela2
+  WHERE campo1 = valor1
+  [AND/OR campoN = valorN]
+);
+```
+- Evite o uso de `SELECT *`
+- `INSERT` Idempotência
+```sql
+INSERT INTO agencia (banco_numero, numero, nome) 
+VALUES (341,1,'Centro da Cidade');
+
+-- mal uso:
+INSERT INTO agencia (banco_numero, numero, nome) 
+SELECT 341,1,'Centro da Cidade'
+WHERE NOT EXISTS (
+  SELECT banco_numero, numero, nome
+  FROM agencia
+  WHERE banco_numero = 341 AND numero = 1 AND nome = 'Centro da Cidade'
+);
+
+-- bom uso:
+INSERT INTO agencia (banco_numero, numero, nome) 
+VALUES (341,1,'Centro da Cidade')
+ON CONFLICT (banco_numero, numero) DO NOTHING;
+```
+
+- `TRUNCATE`: limpa uma tabela
+```sql
+TRUNCATE [ TABLE ] [ ONLY ] name [ * ] [, ... ]
+    [ RESTART IDENTITY | CONTINUE IDENTITY ] [ CASCADE | RESTRICT ]
+```
+- Comandos utilizados na prática:
+```sql
+CREATE TABLE IF NOT EXISTS teste (
+	id SERIAL PRIMARY KEY,
+	nome VARCHAR(50) NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS teste;
+
+CREATE TABLE IF NOT EXISTS teste (
+	cpf VARCHAR(11) NOT NULL,
+	nome VARCHAR(50) NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (cpf)
+);
+
+INSERT INTO teste (cpf, nome, created_at)
+VALUES ('12345678901', 'José Maria', '2019-07-01 23:01:00');
+
+INSERT INTO teste (cpf, nome, created_at)
+VALUES ('12345678901', 'José Maria', '2019-07-01 23:01:00')
+ON CONFLICT (cpf) DO NOTHING;
+
+UPDATE teste SET nome = 'Pedro Silva' WHERE cpf = '12345678901';
+
+SELECT * FROM teste;
+```
