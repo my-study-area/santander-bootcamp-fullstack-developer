@@ -337,63 +337,63 @@ CREATE ROLE daniel2 LOGIN PASSWORD '123' ROLE professores;
 CREATE DATABASE financas;
 
 CREATE TABLE IF NOT EXISTS banco (
-	numero INTEGER NOT NULL,
-	nome VARCHAR(50) NOT NULL,
-	ativo BOOLEAN NOT NULL DEFAULT TRUE,
-	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (numero)
+  numero INTEGER NOT NULL,
+  nome VARCHAR(50) NOT NULL,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (numero)
 );
 
 CREATE TABLE IF NOT EXISTS agencia (
-	banco_numero INTEGER NOT NULL,
-	numero INTEGER NOT NULL,
-	nome VARCHAR(80) NOT NULL,
-	ativo BOOLEAN NOT NULL DEFAULT TRUE,
-	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (banco_numero,numero),
-	FOREIGN KEY (banco_numero) REFERENCES banco (numero)
+  banco_numero INTEGER NOT NULL,
+  numero INTEGER NOT NULL,
+  nome VARCHAR(80) NOT NULL,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (banco_numero,numero),
+  FOREIGN KEY (banco_numero) REFERENCES banco (numero)
 );
 
 CREATE TABLE IF NOT EXISTS cliente (
-	numero BIGSERIAL PRIMARY KEY,
-	nome VARCHAR(120) NOT NULL,
-	email VARCHAR(120) NOT NULL,
-	ativo BOOLEAN NOT NULL DEFAULT TRUE,
-	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  numero BIGSERIAL PRIMARY KEY,
+  nome VARCHAR(120) NOT NULL,
+  email VARCHAR(120) NOT NULL,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS conta_corrente (
-	banco_numero INTEGER NOT NULL,
-	agencia_numero INTEGER NOT NULL,
-	numero BIGINT NOT NULL,
-	digito SMALLINT NOT NULL,
-	cliente_numero BIGINT NOT NULL,
-	ativo BOOLEAN NOT NULL DEFAULT TRUE,
-	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (banco_numero,agencia_numero,numero, digito,cliente_numero),
-	FOREIGN KEY (banco_numero, agencia_numero) REFERENCES agencia (banco_numero,numero)
+  banco_numero INTEGER NOT NULL,
+  agencia_numero INTEGER NOT NULL,
+  numero BIGINT NOT NULL,
+  digito SMALLINT NOT NULL,
+  cliente_numero BIGINT NOT NULL,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (banco_numero,agencia_numero,numero, digito,cliente_numero),
+  FOREIGN KEY (banco_numero, agencia_numero) REFERENCES agencia (banco_numero,numero)
 );
 
 CREATE TABLE IF NOT EXISTS tipo_transacao (
-	id SMALLSERIAL PRIMARY KEY,
-	nome VARCHAR(50) NOT NULL,
-	ativo BOOLEAN NOT NULL DEFAULT TRUE,
-	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  id SMALLSERIAL PRIMARY KEY,
+  nome VARCHAR(50) NOT NULL,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 
 CREATE TABLE IF NOT EXISTS cliente_transacoes (
-	id BIGSERIAL PRIMARY KEY,
-	banco_numero INTEGER NOT NULL,
-	agencia_numero INTEGER NOT NULL,
-	conta_corrente_numero BIGINT NOT NULL,
-	conta_corrente_digito SMALLINT NOT NULL,
-	cliente_numero BIGINT NOT NULL,
-	tipo_transacao_id SMALLINT NOT NULL,
-	valor NUMERIC(15,2) NOT NULL,
-	data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (banco_numero, agencia_numero,conta_corrente_numero,conta_corrente_digito,cliente_numero) 
-		REFERENCES conta_corrente (banco_numero,agencia_numero,numero, digito,cliente_numero)	
+  id BIGSERIAL PRIMARY KEY,
+  banco_numero INTEGER NOT NULL,
+  agencia_numero INTEGER NOT NULL,
+  conta_corrente_numero BIGINT NOT NULL,
+  conta_corrente_digito SMALLINT NOT NULL,
+  cliente_numero BIGINT NOT NULL,
+  tipo_transacao_id SMALLINT NOT NULL,
+  valor NUMERIC(15,2) NOT NULL,
+  data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (banco_numero, agencia_numero,conta_corrente_numero,conta_corrente_digito,cliente_numero) 
+   REFERENCES conta_corrente (banco_numero,agencia_numero,numero, digito,cliente_numero)	
 );
 ```
 
@@ -626,4 +626,62 @@ JOIN conta_corrente
   AND conta_corrente.agencia_numero = agencia.numero
 JOIN cliente
   ON cliente.numero = conta_corrente.cliente_numero;
+```
+
+### Otimizando o código com CTE
+- `Common Table Expression (CTE)`: Forma auxiliar de organizar "statements", ou seja, blocos de códigos, para consultas muito grandes, gerando tabelas temporárias e criando relacionamentos entre elas. Dentro dos statements podem ter SELECTs, INSERTs, UPDATEs OU DELETEs.
+- Comandos utilizados na prática:
+```sql
+SELECT numero, nome FROM banco;
+SELECT banco_numero, numero, nome FROM agencia;
+
+WITH tbl_tmp_banco AS (
+  SELECT numero, nome
+  FROM banco
+)
+
+SELECT numero, nome 
+FROM tbl_tmp_banco;
+
+WITH params AS (
+  SELECT 213 AS banco_numero
+), tbl_tmp_banco AS (
+  SELECT numero, nome
+  FROM banco
+  JOIN params ON params.banco_numero = banco.numero
+)
+
+SELECT numero, nome
+FROM tbl_tmp_banco;
+
+SELECT banco.numero, banco.nome
+FROM banco
+JOIN (
+  SELECT 213 as banco_numero
+) params ON params.banco_numero = banco.numero;
+
+WITH clientes_e_transacoes AS (
+  SELECT cliente.nome AS cliente_nome,
+     tipo_transacao.nome AS tipo_transacao_nome,
+     cliente_transacoes.valor AS tipo_transacao_valor
+  FROM cliente_transacoes
+  JOIN cliente ON cliente.numero = cliente_transacoes.cliente_numero
+  JOIN tipo_transacao ON tipo_transacao.id = cliente_transacoes.tipo_transacao_id
+)
+
+SELECT cliente_nome, tipo_transacao_nome, tipo_transacao_valor
+FROM clientes_e_transacoes;
+
+WITH clientes_e_transacoes AS (
+  SELECT cliente.nome AS cliente_nome,
+     tipo_transacao.nome AS tipo_transacao_nome,
+     cliente_transacoes.valor AS tipo_transacao_valor
+  FROM cliente_transacoes
+  JOIN cliente ON cliente.numero = cliente_transacoes.cliente_numero
+  JOIN tipo_transacao ON tipo_transacao.id = cliente_transacoes.tipo_transacao_id
+  JOIN banco ON banco.numero = cliente_transacoes.banco_numero AND banco.nome ILIKE '%itaú%'
+)
+
+SELECT cliente_nome, tipo_transacao_nome, tipo_transacao_valor
+FROM clientes_e_transacoes;
 ```
