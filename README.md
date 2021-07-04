@@ -685,3 +685,162 @@ WITH clientes_e_transacoes AS (
 SELECT cliente_nome, tipo_transacao_nome, tipo_transacao_valor
 FROM clientes_e_transacoes;
 ```
+
+### Como as views auxiliam no acesso ao banco de dados
+- `View` são visões, camadas para as tabelas, "alias" para uma ou mais queries e aceitam comandos de `SELECT`, `INSERT` E `UPDATE`.
+- `View` com idempotência:
+```sql
+CREATE OR REPLACE VIEW vw_bancos AS (
+  SELECT numero, nome, ativo
+  FROM banco
+);
+
+SELECT numero, nome, ativo
+FROM vw_bancos;
+
+CREATE OR REPLACE VIEW vw_bancos (banco_numero, banco_nome, banco_ativo) AS (
+  SELECT numero, nome, ativo
+  FROM banco
+);
+
+SELECT banco_numero, banco_nome, banco_ativo
+FROM vw_bancos;
+```
+- `Views` para INSERT, UPDATE E DELETE:
+```sql
+-- Funcionam apenas para VIEWs com apenas 1 tabela para INSERT, UPDATE E DELETE
+
+CREATE OR REPLACE VIEW vw_bancos AS (
+  SELECT numero, nome, ativo
+  FROM banco
+);
+
+INSERT INTO vw_bancos (numero, nome, ativo) VALUES (100, 'Banco cem', TRUE);
+
+UPDATE vw_bancos set nome = 'Banco 100' WHERE numero = 100;
+
+DELETE FOM vw_bancos WHERE numero = 100;
+```
+- Comandos utilizados na prática:
+```sql
+SELECT numero, nome, ativo
+FROM banco;
+
+CREATE OR REPLACE VIEW vw_bancos AS (
+  SELECT numero, nome, ativo
+  FROM banco
+);
+
+SELECT numero, nome, ativo
+FROM vw_bancos;
+
+CREATE OR REPLACE VIEW vw_bancos2 (banco_numero, banco_nome, banco_ativo) AS (
+  SELECT numero, nome, ativo
+  FROM banco
+);
+
+INSERT INTO vw_bancos2 (banco_numero, banco_nome, banco_ativo)
+VALUES (51, 'Banco Boa ideia', TRUE);
+
+SELECT banco_numero, banco_nome, banco_ativo
+FROM vw_bancos2 WHERE banco_numero = 51;
+
+UPDATE vw_bancos2 SET banco_ativo = FALSE WHERE banco_numero = 51;
+
+DELETE FROM vw_bancos2 WHERE banco_numero = 51;
+
+CREATE OR REPLACE TEMPORARY VIEW vw_agencia AS (
+	SELECT nome FROM agencia
+);
+
+SELECT nome FROM vw_agencia;
+
+CREATE OR REPLACE VIEW vw_bancos_com_ativos AS (
+  SELECT numero, nome, ativo
+  FROM banco
+  WHERE ativo = TRUE
+) WITH LOCAL CHECK OPTION;
+
+INSERT INTO vw_bancos_com_ativos (numero, nome, ativo)
+VALUES (51, 'Banco Boa ideia', FALSE);
+-- ERROR:  new row violates check option for view "vw_bancos_com_ativos"
+-- DETAIL:  Failing row contains (51, Banco Boa ideia, f, 2021-07-04 18:06:37.006524).
+-- SQL state: 44000
+
+CREATE OR REPLACE VIEW vw_bancos_com_a AS (
+  SELECT numero, nome, ativo
+  FROM vw_bancos_com_ativos
+  WHERE nome ILIKE 'a%'
+) WITH LOCAL CHECK OPTION;
+
+SELECT nome FROM vw_bancos_com_a;
+
+INSERT INTO vw_bancos_com_a (numero, nome, ativo) VALUES (333, 'Alfa Omega', true);
+
+INSERT INTO vw_bancos_com_a (numero, nome, ativo) VALUES (331, 'Beta Omega', true);
+--ERROR:  new row violates check option for view "vw_bancos_com_a"
+
+INSERT INTO vw_bancos_com_a (numero, nome, ativo) VALUES (331, 'Alfa Gama', true);
+
+INSERT INTO vw_bancos_com_a (numero, nome, ativo) VALUES (332, 'Alfa false', false);
+--ERROR:  new row violates check option for view "vw_bancos_com_ativos"
+
+--atualiza view removendo restrição da view
+CREATE OR REPLACE VIEW vw_bancos_com_ativos AS (
+  SELECT numero, nome, ativo
+  FROM banco
+  WHERE ativo = TRUE
+);
+
+INSERT INTO vw_bancos_com_a (numero, nome, ativo) VALUES (332, 'Alfa false', false);
+
+-- atualiza view para restringir em cascata
+CREATE OR REPLACE VIEW vw_bancos_com_a AS (
+  SELECT numero, nome, ativo
+  FROM vw_bancos_com_ativos
+  WHERE nome ILIKE 'a%'
+) WITH CASCADED CHECK OPTION;
+
+INSERT INTO vw_bancos_com_a (numero, nome, ativo) VALUES (334, 'Alfa False False', false);
+-- ERROR:  new row violates check option for view "vw_bancos_com_ativos"
+
+CREATE TABLE IF NOT EXISTS funcionarios (
+	id SERIAL,
+	nome VARCHAR(50),
+	gerente INTEGER,
+	PRIMARY KEY (id),
+	FOREIGN KEY (gerente) REFERENCES funcionarios(id)
+);
+
+INSERT INTO funcionarios (nome, gerente) VALUES ('Anselmo', null);
+INSERT INTO funcionarios (nome, gerente) VALUES ('Beatriz', 1);
+INSERT INTO funcionarios (nome, gerente) VALUES ('Magno', 1);
+INSERT INTO funcionarios (nome, gerente) VALUES ('Cremilda', 2);
+INSERT INTO funcionarios (nome, gerente) VALUES ('Wagner', 4);
+												
+SELECT id, nome, gerente FROM funcionarios;
+
+SELECT id, nome, gerente FROM funcionarios WHERE gerente IS NULL
+UNION ALL
+SELECT id, nome, gerente FROM funcionarios WHERE id = 999; -- apenas para exemplificar
+
+CREATE OR REPLACE RECURSIVE VIEW vw_func(id, gerente, funcionario) AS (
+	SELECT id, gerente, nome
+	FROM funcionarios
+	WHERE gerente IS NULL
+	
+	UNION ALL
+	
+	SELECT funcionarios.id, funcionarios.gerente, funcionarios.nome
+	FROM funcionarios
+	JOIN vw_func ON vw_func.id = funcionarios.gerente
+);
+
+SELECT id, gerente, funcionario
+FROM vw_func;
+
+-- Desafio: mostrar o nome do gerente
+SELECT vw_func.id, vw_func.funcionario, funcionarios.nome AS gerente_nome
+FROM vw_func
+INNER JOIN funcionarios ON vw_func.gerente = funcionarios.id
+```
