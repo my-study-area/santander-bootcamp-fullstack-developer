@@ -97,6 +97,33 @@ faca {
 - `Vetor` é uma matriz que possui somente uma dimenção.
 
 ## Conceitos e melhores práticas com bancos de dados PostgreSQL
+### Configuração do ambiente docker
+- Clone o projeto:
+```bash
+git clone https://github.com/my-study-area/santander-bootcamp-fullstack-developer.git
+```
+- Entre no diretório:
+```bash
+cd santander-bootcamp-fullstack-developer
+```
+- Inicialize os container PostgreSQL e PGAdmin4
+```bash
+docker-compose up -d
+```
+- Para acessar o PostgreSQL via linha de comando execute:
+```bash
+docker-compose exec db psql -U user aula
+```
+- Para acessar o PGAdmin acesse [http://localhost:8080/](http://localhost:8080/) utilizando o seguinte usuário e senha:
+
+|Usuário           |Senha|
+|------------------|-----|
+|email@email.com   |123  |
+
+- Para desligar os containers execute:
+```bash
+docker-compose down
+```
 
 ### Fundamentos de banco de dados
 - **Modelo Relacional** é um modelo de dados representativo, onde as informações são organizadas em tabelas. A tabela é forma por linhas e colunas, onde as linhas são os dados e as colunas são os atributos.
