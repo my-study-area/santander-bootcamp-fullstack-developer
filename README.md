@@ -874,3 +874,151 @@ ROLLBACK TO sf_func;
 UPDATE funcionarios SET gerente = 3 WHERE id = 5;
 COMMIT;
 ```
+
+### Conheça as funções que podem ser criadas pelo desenvolvedor
+- Funções
+  - Definição
+    - Conjunto de códigos que são executdos dentro de uma transação com a finalizade de facilitar a programação e obter o reaproveitamento/reutilização de códigos.
+    - Existem 4 tipos de funções:
+      - query language functions (funções escritas em SQL)
+      - procedural language functions (funções escritas, por exemplo, PL/pgSQL ou PL/py)
+      - internal functions
+      - C-language functions
+    - O foco no curso é sobre `USER DEFINED FUNCTIONS`.
+  
+  - Linguagens
+    - SQL
+    - **PL/PGSQL**
+    - PL/PY
+    - PL/PHP
+    - PL/RUBY
+    - PL/JAVA
+    - PL/LUA
+  - Idempotência
+  ```sql
+  CREATE OR REPLACE FUNCTION [nome da função]
+  ```
+    - Mesmo nome
+    - Mesmo tipo de retorno
+    - Mesmo número de parâmetros/argumentos
+  - `RETURNs`
+    - Tipo de retorno (data type)
+      - INTEGER
+      - CHAR / VARCHAR
+      - BOOLEAN
+      - ROW
+      - TABLE
+      - JSON
+  - Language
+    - SQL
+    - PLPGSQL
+    - PLJAVA
+    - PLPY
+  - Segurança
+    - Security
+      - INVOKER (padrão): executa a função com a permissão do usuário que está executando a função
+      - DEFINER: o usuário que está executando a função executa com as permissões do usuário que criou a função.
+  - Recursos
+    - COST: custo/row em unidades de CPU
+    - ROWS: Número estimado de linhas que será analisada pelo planner
+  - SQL FUNCTIONS
+    - Não é possível utilizar `TRANSAÇÕES`
+
+- Comandos utilizados na prática:
+```sql
+-- RETURNS NULL ON NULL INPUT
+CREATE OR REPLACE FUNCTION func_somar(INTEGER, INTEGER)
+RETURNS INTEGER
+SECURITY DEFINER
+RETURNS NULL ON NULL INPUT
+LANGUAGE SQL
+AS $$
+	SELECT $1 + $2;
+$$;
+
+SELECT func_somar(100, 2);
+SELECT func_somar(100, null); --retorna null
+
+-- 'CALLED ON NULL INPUT' SEM TRATAMENTO DE NULL
+CREATE OR REPLACE FUNCTION func_somar(INTEGER, INTEGER)
+RETURNS INTEGER
+SECURITY DEFINER
+CALLED ON NULL INPUT
+LANGUAGE SQL
+AS $$
+	SELECT $1 + $2;
+$$;
+
+SELECT func_somar(100, 2);
+SELECT func_somar(100, null); --retorna null
+
+-- 'CALLED ON NULL INPUT' COM TRATAMENTO DE NULL
+SELECT COALESCE(null, 'adriano', 'digital'); --adriano
+SELECT COALESCE(null, NULL, 'digital', 'adriano'); --digital
+
+CREATE OR REPLACE FUNCTION func_somar(INTEGER, INTEGER)
+RETURNS INTEGER
+SECURITY DEFINER
+CALLED ON NULL INPUT
+LANGUAGE SQL
+AS $$
+	SELECT COALESCE($1,0) + COALESCE($2,0);
+$$;
+
+SELECT func_somar(100, 2);
+SELECT func_somar(100, null); -- retorna 100
+
+--PLPGSQL
+CREATE OR REPLACE FUNCTION bancos_add(p_numero INTEGER, p_nome VARCHAR, p_ativo BOOLEAN)
+RETURNS INTEGER
+SECURITY INVOKER
+LANGUAGE PLPGSQL
+CALLED ON NULL INPUT
+AS $$
+DECLARE variavel_id INTEGER;
+BEGIN
+	SELECT INTO variavel_id numero
+	FROM banco
+	WHERE numero = p_numero;
+	
+	RETURN variavel_id;
+END; $$;
+
+SELECT bancos_add(1, 'Banco Novo', FALSE); --1
+SELECT bancos_add(5432, 'Banco Novo', FALSE); --NULL
+
+-- Tratamento de erros
+CREATE OR REPLACE FUNCTION bancos_add(p_numero INTEGER, p_nome VARCHAR, p_ativo BOOLEAN)
+RETURNS INTEGER
+SECURITY INVOKER
+LANGUAGE PLPGSQL
+CALLED ON NULL INPUT
+AS $$
+DECLARE variavel_id INTEGER;
+BEGIN
+	IF p_numero IS NULL OR p_nome IS NULL OR p_ativo IS NULL THEN
+		RETURN 0;
+	END IF;
+	SELECT INTO variavel_id numero
+	FROM banco
+	WHERE numero = p_numero;
+
+	IF variavel_id IS NULL THEN
+		INSERT INTO banco(numero, nome, ativo)
+		VALUES (p_numero, p_nome, p_ativo);
+	ELSE
+		RETURN variavel_id;
+	END IF;
+
+	SELECT INTO variavel_id numero
+	FROM banco
+	WHERE numero = p_numero;
+	
+	RETURN variavel_id;
+END; $$;
+
+SELECT bancos_add(5432, 'Banco Novo', FALSE);
+SELECT bancos_add(NULL, 'Banco Novo', FALSE);
+
+SELECT * FROM banco WHERE numero = 5432;
+```
