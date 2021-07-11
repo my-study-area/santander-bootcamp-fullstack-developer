@@ -1,5 +1,16 @@
 # santander-bootcamp-fullstack-developer
 
+<p>
+    <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/my-study-area/santander-bootcamp-fullstack-developer">
+    <a href="https://github.com/my-study-area">
+        <img alt="Made by" src="https://img.shields.io/badge/made%20by-adriano%20avelino-gree">
+    </a>
+    <img alt="Repository size" src="https://img.shields.io/github/repo-size/my-study-area/santander-bootcamp-fullstack-developer">
+    <a href="https://github.com/EliasGcf/readme-template/commits/master">
+    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/my-study-area/santander-bootcamp-fullstack-developer">
+    </a>
+</p>
+
 ## Lógica de programação essencial
 ### Entendendo o que é Lógica
 
